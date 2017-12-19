@@ -453,10 +453,9 @@
             (define n (match (car (filter (match-lambda [`(proc (,f . ,_) . ,_) (eq? f lamx)]) procs))
                              [`(proc (,lamx ,ys ...) . ,_) (length ys)]))
             (define f (gensym 'f))
-            (define bytes (* (+ (length xs) 1) 8))
             (apply string-append
                    `(,(comment-line
-                       "  %" (s-> cptr) " = call i64* @alloc(i64 " (number->string bytes) ")"
+                       "  %" (s-> cptr) " = call i64* @alloc(i64 " (number->string (* (+ (length xs) 1) 8)) ")"
                        "malloc")
                      ,@(map (lambda (iptr n)
                               (comment-line

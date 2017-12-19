@@ -5,6 +5,7 @@
 #include "stdlib.h"
 #include "stdint.h"
 #include <iostream>
+#include "uthash.h"
 
 #define CLO_TAG 0
 #define CONS_TAG 1
@@ -16,6 +17,7 @@
 
 
 #define VECTOR_OTHERTAG 1
+#define HASH_OTHERTAG 2
 // Hashes, Sets, gen records, can all be added here
 
 
@@ -104,16 +106,17 @@ typedef uint32_t u32;
 typedef int32_t s32;
 
 
+struct hash_tbl {
+    u64 key;
+    u64 value;
+    UT_hash_handle hh;
+};
+
+u64 memory_cap = 0;
+
     
 // UTILS
 
-
-u64* alloc(const u64 m)
-{
-    return (u64*)(malloc(m));
-    //return new u64[m];
-    //return (u64*)GC_MALLOC(m);
-}
 
 void fatal_err(const char* msg)
 {
@@ -122,6 +125,21 @@ void fatal_err(const char* msg)
     printf("\n");
     exit(1);
 }
+
+u64* alloc(const u64 m)
+{
+
+    return (u64*)(malloc(m));
+    //return new u64[m];
+    //return (u64*)GC_MALLOC(m);
+}
+
+void check_size(u64 val){
+    if (DECODE_INT(val) > 2147483647){
+        fatal_err("One of the variables was given a value that was larger than the maximum value of an int causing an integer overflow.");
+    }
+}
+
 
 void print_u64(u64 i)
 {
@@ -261,6 +279,11 @@ u64 prim_print_aux(u64 v)
         }
         printf(")");
     }
+    else if ((v&7) == OTHER_TAG
+             && (HASH_OTHERTAG == (((u64*)DECODE_OTHER(v))[0])))
+    {
+        printf("HERE");
+    }
     else
         printf("(print.. v); unrecognized value %lu", v);
     //...
@@ -308,6 +331,24 @@ u64 prim_print(u64 v)
         }
         printf(")");
     }
+    else if ((v&7) == OTHER_TAG
+             && (HASH_OTHERTAG == (((u64*)DECODE_OTHER(v))[0])))
+    {
+        printf("#hash(");
+        u64* vec = (u64*)DECODE_OTHER(v);
+        u64* ptr_to_hash = DECODE_OTHER(vec[1]);
+        hash_tbl * tbls = (hash_tbl *) ptr_to_hash;
+        hash_tbl * tbl;
+        for(tbl=tbls; tbl != NULL; tbl=(hash_tbl*)(tbl->hh.next)) {
+            if(tbl->hh.next == NULL){
+                printf("(%d . %d)", DECODE_INT(tbl->key), DECODE_INT(tbl->value));
+            }else{
+                printf("(%d . %d) ", DECODE_INT(tbl->key), DECODE_INT(tbl->value));
+            }
+            
+        }
+        printf(")");
+    }
     else
         printf("(print v); unrecognized value %lu", v);
     //...
@@ -329,10 +370,20 @@ u64 applyprim_vector(u64 lst)
 {
     // pretty terrible, but works
     u64* buffer = (u64*)malloc(512*sizeof(u64));
+    memory_cap = ENCODE_INT(DECODE_INT(memory_cap) + (512*sizeof(u64)));
+    //printf("%d\n", DECODE_INT(memory_cap));
+    if (DECODE_INT(memory_cap) > 268435456){
+        fatal_err("Memory cap exceeded 256 mb.");
+    }
     u64 l = 0;
     while ((lst&7) == CONS_TAG && l < 512) 
         buffer[l++] = expect_cons(lst, &lst);
     u64* mem = alloc((l + 1) * sizeof(u64));
+    memory_cap = ENCODE_INT(DECODE_INT(memory_cap) + ((l + 1) * sizeof(u64)));
+    //printf("%d\n", DECODE_INT(memory_cap));
+    if(DECODE_INT(memory_cap) > 268435456){
+        fatal_err("Memory cap exceeded 256 mb.");
+    }
     mem[0] = (l << 3) | VECTOR_OTHERTAG;
     for (u64 i = 0; i < l; ++i)
         mem[i+1] = buffer[i];
@@ -348,6 +399,11 @@ u64 prim_make_45vector(u64 lenv, u64 iv)
     
     const u64 l = DECODE_INT(lenv);
     u64* vec = (u64*)alloc((l + 1) * sizeof(u64));
+    memory_cap = ENCODE_INT(DECODE_INT(memory_cap) + ((l + 1) * sizeof(u64)));
+    //printf("%d\n", DECODE_INT(memory_cap));
+    if(DECODE_INT(memory_cap) > 268435456){
+        fatal_err("Memory cap exceeded 256 mb.");
+    }
     vec[0] = (l << 3) | VECTOR_OTHERTAG;
     for (u64 i = 1; i <= l; ++i)
         vec[i] = iv;
@@ -363,6 +419,8 @@ u64 prim_vector_45ref(u64 v, u64 i)
 
     if ((((u64*)DECODE_OTHER(v))[0]&7) != VECTOR_OTHERTAG)
         fatal_err("vector-ref not given a properly formed vector");
+
+    u64* vec = (u64*)DECODE_OTHER(v);
 
     return ((u64*)DECODE_OTHER(v))[1+(DECODE_INT(i))];
 }
@@ -500,6 +558,11 @@ GEN_EXPECT1ARGLIST(applyprim_cons_63, prim_cons_63)
 u64 prim_cons(u64 a, u64 b)
 {
     u64* p = alloc(2*sizeof(u64));
+    memory_cap = ENCODE_INT(DECODE_INT(memory_cap) + (2*sizeof(u64)));
+    //printf("%d\n", DECODE_INT(memory_cap));
+    if(DECODE_INT(memory_cap) > 268435456){
+        fatal_err("Memory cap exceeded 256 mb.");
+    }
     p[0] = a;
     p[1] = b;
     return ENCODE_CONS(p);
@@ -536,6 +599,8 @@ u64 prim__43(u64 a, u64 b) // +
     ASSERT_TAG(b, INT_TAG, "(prim + a b); b is not an integer")
 
         //printf("sum: %d\n", DECODE_INT(a) + DECODE_INT(b));
+    check_size(a);
+    check_size(b);
     
     return ENCODE_INT(DECODE_INT(a) + DECODE_INT(b));
 }
@@ -650,8 +715,62 @@ u64 prim_not(u64 a)
 GEN_EXPECT1ARGLIST(applyprim_not, prim_not)
 
 
+u64 prim_make_45hash(u64 lst)
+{
+    ASSERT_TAG(lst, CONS_TAG, "not given a list")
+
+    struct hash_tbl * new_pair = NULL;
+    struct hash_tbl * new_table = NULL;
+    u64 pair;
+    u64* vec = (u64*)alloc(2 * sizeof(hash_tbl));
+    vec[0] = HASH_OTHERTAG;
+    while ((lst&7) == CONS_TAG){
+        new_pair = (struct hash_tbl*)malloc(sizeof(struct hash_tbl));
+        u64 keylen = sizeof(u64);
+        pair = prim_car(lst);
+        u64 key = ENCODE_OTHER(prim_car(pair));
+        u64 value = ENCODE_OTHER(prim_cdr(pair));
+        new_pair->key = key;
+        new_pair->value = value;
+        lst = prim_cdr(lst);
+        HASH_ADD(hh, new_table, key, DECODE_INT(keylen), new_pair);
+    }
+    vec[1] = ENCODE_OTHER(new_table);
+    return ENCODE_OTHER(vec);
+}
+
+GEN_EXPECT1ARGLIST(applyprim_make_45hash, prim_make_45hash)
+/**
+u64 prim_hash_45ref(u64 hash, u64 key)
+{
+    if((HASH_OTHERTAG != (((u64*)DECODE_OTHER(hash))[0]))){
+        fatal_err("Not given a hash.");
+    }
+    
+    u64* vec = (u64*)DECODE_OTHER(hash);
+    u64 keylen = sizeof(u64);
+    u64* ptr_to_hash = DECODE_OTHER(vec[1]);
+    hash_tbl * tbls = (hash_tbl *) ptr_to_hash;
+    hash_tbl * tbl = NULL;
+    struct hash_tbl pair_to_find;
+    memset(&pair_to_find,0,sizeof(struct hash_tbl));
+    pair_to_find.key = key;
+    HASH_FIND(hh, tbls, &key, DECODE_INT(keylen), tbl);
+    if(tbl != NULL){
+        printf("(%d . %d) ", DECODE_INT(tbl->key), DECODE_INT(tbl->value));
+        return tbl->value;
+    }
+    
+    return V_NULL;
+    
 
 }
+
+GEN_EXPECT2ARGLIST(applyprim_hash_45ref, prim_hash_45ref)
+**/
+
+}
+
 
 
 

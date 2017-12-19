@@ -2,15 +2,8 @@
 
 (require "utils.rkt")
 
-(provide simplify-ae
-         remove-varargs
-         callsites-lambdas
-         shallow
-         compute-vararg-set
-         0-cfa
-         successors
-         closure-convert
-         proc->llvm)
+(provide 
+         proc->llvm-b)
 
 
 ; Whether to optimize vararg conversion using static analysis (0-cfa) results
@@ -384,7 +377,7 @@
         `((proc (main) ,main-body) . ,procs))))
 
 
-(define (proc->llvm procs)
+(define (proc->llvm-b procs)
   (define globals "")
   (define (s-> s) (c-name s))
 
@@ -453,10 +446,9 @@
             (define n (match (car (filter (match-lambda [`(proc (,f . ,_) . ,_) (eq? f lamx)]) procs))
                              [`(proc (,lamx ,ys ...) . ,_) (length ys)]))
             (define f (gensym 'f))
-            (define bytes (* (+ (length xs) 1) 8))
             (apply string-append
                    `(,(comment-line
-                       "  %" (s-> cptr) " = call i64* @alloc(i64 " (number->string bytes) ")"
+                       "  %" (s-> cptr) " = call i64* @alloc(i64 " (number->string (* (+ (length xs) 1) 8)) ")"
                        "malloc")
                      ,@(map (lambda (iptr n)
                               (comment-line

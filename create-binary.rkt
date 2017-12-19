@@ -5,6 +5,7 @@
 (require "cps.rkt")
 (require "closure-convert.rkt")
 (require "top-level.rkt")
+(require "closure-convert-boehm.rkt")
 
 (provide create-binary)
 

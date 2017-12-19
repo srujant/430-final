@@ -1,1 +1,5 @@
-<h1> Srujan Thotapally Final Project </h1>
+430 Final Project - Srujan Thotapally
+===================
+
+Pertinent Files
+-------------
