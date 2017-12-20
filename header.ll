@@ -45,25 +45,26 @@ target triple = "x86_64-pc-linux-gnu"
 @.str.31 = private unnamed_addr constant [49 x i8] c"second argument to vector-ref must be an integer\00", align 1
 @.str.32 = private unnamed_addr constant [46 x i8] c"first argument to vector-ref must be a vector\00", align 1
 @.str.33 = private unnamed_addr constant [46 x i8] c"vector-ref not given a properly formed vector\00", align 1
-@.str.34 = private unnamed_addr constant [48 x i8] c"first argument to vector-ref must be an integer\00", align 1
-@.str.35 = private unnamed_addr constant [34 x i8] c"(prim + a b); a is not an integer\00", align 1
-@.str.36 = private unnamed_addr constant [34 x i8] c"(prim + a b); b is not an integer\00", align 1
-@.str.37 = private unnamed_addr constant [36 x i8] c"Tried to apply + on non list value.\00", align 1
-@.str.38 = private unnamed_addr constant [34 x i8] c"(prim - a b); b is not an integer\00", align 1
-@.str.39 = private unnamed_addr constant [34 x i8] c"(prim * a b); a is not an integer\00", align 1
-@.str.40 = private unnamed_addr constant [34 x i8] c"(prim * a b); b is not an integer\00", align 1
-@.str.41 = private unnamed_addr constant [34 x i8] c"(prim / a b); a is not an integer\00", align 1
-@.str.42 = private unnamed_addr constant [34 x i8] c"(prim / a b); b is not an integer\00", align 1
-@.str.43 = private unnamed_addr constant [41 x i8] c"Division by 0 error. Cannot divide by 0.\00", align 1
-@.str.44 = private unnamed_addr constant [34 x i8] c"(prim = a b); a is not an integer\00", align 1
-@.str.45 = private unnamed_addr constant [34 x i8] c"(prim = a b); b is not an integer\00", align 1
-@.str.46 = private unnamed_addr constant [34 x i8] c"(prim < a b); a is not an integer\00", align 1
-@.str.47 = private unnamed_addr constant [34 x i8] c"(prim < a b); b is not an integer\00", align 1
-@.str.48 = private unnamed_addr constant [35 x i8] c"(prim <= a b); a is not an integer\00", align 1
-@.str.49 = private unnamed_addr constant [35 x i8] c"(prim <= a b); b is not an integer\00", align 1
-@.str.50 = private unnamed_addr constant [17 x i8] c"not given a list\00", align 1
-@.str.51 = private unnamed_addr constant [18 x i8] c"Not given a hash.\00", align 1
-@.str.52 = private unnamed_addr constant [47 x i8] c"Given a key that is not found within the hash.\00", align 1
+@.str.34 = private unnamed_addr constant [31 x i8] c"illegal reference of a vector.\00", align 1
+@.str.35 = private unnamed_addr constant [48 x i8] c"first argument to vector-ref must be an integer\00", align 1
+@.str.36 = private unnamed_addr constant [34 x i8] c"(prim + a b); a is not an integer\00", align 1
+@.str.37 = private unnamed_addr constant [34 x i8] c"(prim + a b); b is not an integer\00", align 1
+@.str.38 = private unnamed_addr constant [36 x i8] c"Tried to apply + on non list value.\00", align 1
+@.str.39 = private unnamed_addr constant [34 x i8] c"(prim - a b); b is not an integer\00", align 1
+@.str.40 = private unnamed_addr constant [34 x i8] c"(prim * a b); a is not an integer\00", align 1
+@.str.41 = private unnamed_addr constant [34 x i8] c"(prim * a b); b is not an integer\00", align 1
+@.str.42 = private unnamed_addr constant [34 x i8] c"(prim / a b); a is not an integer\00", align 1
+@.str.43 = private unnamed_addr constant [34 x i8] c"(prim / a b); b is not an integer\00", align 1
+@.str.44 = private unnamed_addr constant [41 x i8] c"Division by 0 error. Cannot divide by 0.\00", align 1
+@.str.45 = private unnamed_addr constant [34 x i8] c"(prim = a b); a is not an integer\00", align 1
+@.str.46 = private unnamed_addr constant [34 x i8] c"(prim = a b); b is not an integer\00", align 1
+@.str.47 = private unnamed_addr constant [34 x i8] c"(prim < a b); a is not an integer\00", align 1
+@.str.48 = private unnamed_addr constant [34 x i8] c"(prim < a b); b is not an integer\00", align 1
+@.str.49 = private unnamed_addr constant [35 x i8] c"(prim <= a b); a is not an integer\00", align 1
+@.str.50 = private unnamed_addr constant [35 x i8] c"(prim <= a b); b is not an integer\00", align 1
+@.str.51 = private unnamed_addr constant [17 x i8] c"not given a list\00", align 1
+@.str.52 = private unnamed_addr constant [18 x i8] c"Not given a hash.\00", align 1
+@.str.53 = private unnamed_addr constant [47 x i8] c"Given a key that is not found within the hash.\00", align 1
 @llvm.global_ctors = appending global [1 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 65535, void ()* @_GLOBAL__sub_I_header.cpp, i8* null }]
 
 ; Function Attrs: uwtable
@@ -1079,13 +1080,13 @@ define i64 @prim_vector_45ref(i64 %v, i64 %i) #0 {
   %27 = load i64, i64* %26, align 8
   %28 = lshr i64 %27, 3
   store i64 %28, i64* %len, align 8
-  %29 = load i64, i64* %len, align 8
-  %30 = load i64, i64* %2, align 8
-  %31 = and i64 %30, -8
-  %32 = lshr i64 %31, 32
-  %33 = trunc i64 %32 to i32
-  %34 = sext i32 %33 to i64
-  %35 = icmp ult i64 %29, %34
+  %29 = load i64, i64* %2, align 8
+  %30 = and i64 %29, -8
+  %31 = lshr i64 %30, 32
+  %32 = trunc i64 %31 to i32
+  %33 = sext i32 %32 to i64
+  %34 = load i64, i64* %len, align 8
+  %35 = icmp ugt i64 %33, %34
   br i1 %35, label %42, label %36
 
 ; <label>:36                                      ; preds = %21
@@ -1093,10 +1094,11 @@ define i64 @prim_vector_45ref(i64 %v, i64 %i) #0 {
   %38 = and i64 %37, -8
   %39 = lshr i64 %38, 32
   %40 = trunc i64 %39 to i32
-  %41 = icmp slt i32 %40, 1
+  %41 = icmp slt i32 %40, 0
   br i1 %41, label %42, label %43
 
 ; <label>:42                                      ; preds = %36, %21
+  call void @fatal_err(i8* getelementptr inbounds ([31 x i8], [31 x i8]* @.str.34, i32 0, i32 0))
   br label %43
 
 ; <label>:43                                      ; preds = %42, %36
@@ -1168,7 +1170,7 @@ define i64 @prim_vector_45set_33(i64 %a, i64 %i, i64 %v) #0 {
   br i1 %11, label %12, label %13
 
 ; <label>:12                                      ; preds = %8
-  call void @fatal_err(i8* getelementptr inbounds ([48 x i8], [48 x i8]* @.str.34, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([48 x i8], [48 x i8]* @.str.35, i32 0, i32 0))
   br label %13
 
 ; <label>:13                                      ; preds = %12, %8
@@ -1195,13 +1197,13 @@ define i64 @prim_vector_45set_33(i64 %a, i64 %i, i64 %v) #0 {
   %28 = load i64, i64* %27, align 8
   %29 = lshr i64 %28, 3
   store i64 %29, i64* %len, align 8
-  %30 = load i64, i64* %len, align 8
-  %31 = load i64, i64* %2, align 8
-  %32 = and i64 %31, -8
-  %33 = lshr i64 %32, 32
-  %34 = trunc i64 %33 to i32
-  %35 = sext i32 %34 to i64
-  %36 = icmp ule i64 %30, %35
+  %30 = load i64, i64* %2, align 8
+  %31 = and i64 %30, -8
+  %32 = lshr i64 %31, 32
+  %33 = trunc i64 %32 to i32
+  %34 = sext i32 %33 to i64
+  %35 = load i64, i64* %len, align 8
+  %36 = icmp ugt i64 %34, %35
   br i1 %36, label %43, label %37
 
 ; <label>:37                                      ; preds = %22
@@ -1209,10 +1211,11 @@ define i64 @prim_vector_45set_33(i64 %a, i64 %i, i64 %v) #0 {
   %39 = and i64 %38, -8
   %40 = lshr i64 %39, 32
   %41 = trunc i64 %40 to i32
-  %42 = icmp slt i32 %41, 1
+  %42 = icmp slt i32 %41, 0
   br i1 %42, label %43, label %44
 
 ; <label>:43                                      ; preds = %37, %22
+  call void @fatal_err(i8* getelementptr inbounds ([31 x i8], [31 x i8]* @.str.34, i32 0, i32 0))
   br label %44
 
 ; <label>:44                                      ; preds = %43, %37
@@ -1704,7 +1707,7 @@ define i64 @prim__43(i64 %a, i64 %b) #0 {
   br i1 %5, label %6, label %7
 
 ; <label>:6                                       ; preds = %0
-  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.35, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.36, i32 0, i32 0))
   br label %7
 
 ; <label>:7                                       ; preds = %6, %0
@@ -1714,7 +1717,7 @@ define i64 @prim__43(i64 %a, i64 %b) #0 {
   br i1 %10, label %11, label %12
 
 ; <label>:11                                      ; preds = %7
-  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.36, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.37, i32 0, i32 0))
   br label %12
 
 ; <label>:12                                      ; preds = %11, %7
@@ -1758,7 +1761,7 @@ define i64 @applyprim__43(i64 %p) #0 {
   br i1 %9, label %10, label %11
 
 ; <label>:10                                      ; preds = %6
-  call void @fatal_err(i8* getelementptr inbounds ([36 x i8], [36 x i8]* @.str.37, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([36 x i8], [36 x i8]* @.str.38, i32 0, i32 0))
   br label %11
 
 ; <label>:11                                      ; preds = %10, %6
@@ -1803,7 +1806,7 @@ define i64 @prim__45(i64 %a, i64 %b) #0 {
   br i1 %5, label %6, label %7
 
 ; <label>:6                                       ; preds = %0
-  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.35, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.36, i32 0, i32 0))
   br label %7
 
 ; <label>:7                                       ; preds = %6, %0
@@ -1813,7 +1816,7 @@ define i64 @prim__45(i64 %a, i64 %b) #0 {
   br i1 %10, label %11, label %12
 
 ; <label>:11                                      ; preds = %7
-  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.38, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.39, i32 0, i32 0))
   br label %12
 
 ; <label>:12                                      ; preds = %11, %7
@@ -1853,7 +1856,7 @@ define i64 @applyprim__45(i64 %p) #0 {
   br i1 %9, label %10, label %11
 
 ; <label>:10                                      ; preds = %6
-  call void @fatal_err(i8* getelementptr inbounds ([36 x i8], [36 x i8]* @.str.37, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([36 x i8], [36 x i8]* @.str.38, i32 0, i32 0))
   br label %11
 
 ; <label>:11                                      ; preds = %10, %6
@@ -1919,7 +1922,7 @@ define i64 @prim__42(i64 %a, i64 %b) #0 {
   br i1 %5, label %6, label %7
 
 ; <label>:6                                       ; preds = %0
-  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.39, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.40, i32 0, i32 0))
   br label %7
 
 ; <label>:7                                       ; preds = %6, %0
@@ -1929,7 +1932,7 @@ define i64 @prim__42(i64 %a, i64 %b) #0 {
   br i1 %10, label %11, label %12
 
 ; <label>:11                                      ; preds = %7
-  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.40, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.41, i32 0, i32 0))
   br label %12
 
 ; <label>:12                                      ; preds = %11, %7
@@ -1969,7 +1972,7 @@ define i64 @applyprim__42(i64 %p) #0 {
   br i1 %9, label %10, label %11
 
 ; <label>:10                                      ; preds = %6
-  call void @fatal_err(i8* getelementptr inbounds ([36 x i8], [36 x i8]* @.str.37, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([36 x i8], [36 x i8]* @.str.38, i32 0, i32 0))
   br label %11
 
 ; <label>:11                                      ; preds = %10, %6
@@ -2014,7 +2017,7 @@ define i64 @prim__47(i64 %a, i64 %b) #0 {
   br i1 %5, label %6, label %7
 
 ; <label>:6                                       ; preds = %0
-  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.41, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.42, i32 0, i32 0))
   br label %7
 
 ; <label>:7                                       ; preds = %6, %0
@@ -2024,7 +2027,7 @@ define i64 @prim__47(i64 %a, i64 %b) #0 {
   br i1 %10, label %11, label %12
 
 ; <label>:11                                      ; preds = %7
-  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.42, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.43, i32 0, i32 0))
   br label %12
 
 ; <label>:12                                      ; preds = %11, %7
@@ -2033,7 +2036,7 @@ define i64 @prim__47(i64 %a, i64 %b) #0 {
   br i1 %14, label %15, label %16
 
 ; <label>:15                                      ; preds = %12
-  call void @fatal_err(i8* getelementptr inbounds ([41 x i8], [41 x i8]* @.str.43, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([41 x i8], [41 x i8]* @.str.44, i32 0, i32 0))
   br label %16
 
 ; <label>:16                                      ; preds = %15, %12
@@ -2065,7 +2068,7 @@ define i64 @prim__61(i64 %a, i64 %b) #0 {
   br i1 %6, label %7, label %8
 
 ; <label>:7                                       ; preds = %0
-  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.44, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.45, i32 0, i32 0))
   br label %8
 
 ; <label>:8                                       ; preds = %7, %0
@@ -2075,7 +2078,7 @@ define i64 @prim__61(i64 %a, i64 %b) #0 {
   br i1 %11, label %12, label %13
 
 ; <label>:12                                      ; preds = %8
-  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.45, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.46, i32 0, i32 0))
   br label %13
 
 ; <label>:13                                      ; preds = %12, %8
@@ -2116,7 +2119,7 @@ define i64 @prim__60(i64 %a, i64 %b) #0 {
   br i1 %6, label %7, label %8
 
 ; <label>:7                                       ; preds = %0
-  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.46, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.47, i32 0, i32 0))
   br label %8
 
 ; <label>:8                                       ; preds = %7, %0
@@ -2126,7 +2129,7 @@ define i64 @prim__60(i64 %a, i64 %b) #0 {
   br i1 %11, label %12, label %13
 
 ; <label>:12                                      ; preds = %8
-  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.47, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([34 x i8], [34 x i8]* @.str.48, i32 0, i32 0))
   br label %13
 
 ; <label>:13                                      ; preds = %12, %8
@@ -2167,7 +2170,7 @@ define i64 @prim__60_61(i64 %a, i64 %b) #0 {
   br i1 %6, label %7, label %8
 
 ; <label>:7                                       ; preds = %0
-  call void @fatal_err(i8* getelementptr inbounds ([35 x i8], [35 x i8]* @.str.48, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([35 x i8], [35 x i8]* @.str.49, i32 0, i32 0))
   br label %8
 
 ; <label>:8                                       ; preds = %7, %0
@@ -2177,7 +2180,7 @@ define i64 @prim__60_61(i64 %a, i64 %b) #0 {
   br i1 %11, label %12, label %13
 
 ; <label>:12                                      ; preds = %8
-  call void @fatal_err(i8* getelementptr inbounds ([35 x i8], [35 x i8]* @.str.49, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([35 x i8], [35 x i8]* @.str.50, i32 0, i32 0))
   br label %13
 
 ; <label>:13                                      ; preds = %12, %8
@@ -2275,7 +2278,7 @@ define i64 @prim_make_45hash(i64 %lst) #0 {
   br i1 %4, label %5, label %6
 
 ; <label>:5                                       ; preds = %0
-  call void @fatal_err(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @.str.50, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @.str.51, i32 0, i32 0))
   br label %6
 
 ; <label>:6                                       ; preds = %5, %0
@@ -4210,7 +4213,7 @@ define i64 @prim_hash_45ref(i64 %hash, i64 %key) #0 {
   br i1 %13, label %14, label %15
 
 ; <label>:14                                      ; preds = %7, %0
-  call void @fatal_err(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @.str.51, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @.str.52, i32 0, i32 0))
   br label %15
 
 ; <label>:15                                      ; preds = %14, %7
@@ -4908,7 +4911,7 @@ define i64 @prim_hash_45ref(i64 %hash, i64 %key) #0 {
   br label %505
 
 ; <label>:504                                     ; preds = %497
-  call void @fatal_err(i8* getelementptr inbounds ([47 x i8], [47 x i8]* @.str.52, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([47 x i8], [47 x i8]* @.str.53, i32 0, i32 0))
   store i64 39, i64* %1, align 8
   br label %505
 
@@ -4992,7 +4995,7 @@ define i64 @prim_hash_45set_33(i64 %hash, i64 %key, i64 %value) #0 {
   br i1 %13, label %14, label %15
 
 ; <label>:14                                      ; preds = %7, %0
-  call void @fatal_err(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @.str.51, i32 0, i32 0))
+  call void @fatal_err(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @.str.52, i32 0, i32 0))
   br label %15
 
 ; <label>:15                                      ; preds = %14, %7

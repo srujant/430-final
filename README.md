@@ -156,6 +156,13 @@ $ racket tests.rkt hash-not-given
 $ racket tests.rkt hash-ref-keynotexist
 ```
 
+- Illegal vector references
+    - In `vector-ref` and `vector-set!`, I check to make sure that the index being given is both greater than 0 (since the 0th index stores the length and the tag) and it is less than or equal to the length of the vector itself. 
+```sh
+$ racket tests.rkt illegal-ref-vector-1
+$ racket tests.rkt illegal-ref-vector-2
+```
+
 ### Changes made to `utils.rkt` and `tests.rkt`
 I created my own method, `test-binary` that calls the method I mentioned above `create-binary`. `test-binary` is passed the expression that is being decoded, the path (which is broken down to just the filename such that the binary is created of the filename), and the folder (if the folder is `secret` then `eval-llvm` is not run such that an exception is not produced when running the tests). This is then passed to `eval-llvm` and `test-binary` which create the compiled executeable and check to see if the output is correct. For tests that do not run `eval-llvm`, `void` is returned such that the tests pass (since exceptions are thrown).
 

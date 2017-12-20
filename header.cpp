@@ -415,8 +415,8 @@ u64 prim_vector_45ref(u64 v, u64 i)
     u64* vec = (u64*)DECODE_OTHER(v);
     u64 len = vec[0] >> 3;
 
-    if(len < DECODE_INT(i) || DECODE_INT(i) < 1){
-        //fatal_err("illegal reference of a vector.");
+    if(DECODE_INT(i) > len || DECODE_INT(i) < 0){
+        fatal_err("illegal reference of a vector.");
     }
 
 
@@ -435,8 +435,8 @@ u64 prim_vector_45set_33(u64 a, u64 i, u64 v)
 
     u64* vec = (u64*)DECODE_OTHER(a);
     u64 len = vec[0] >> 3;
-    if(len <= DECODE_INT(i) || DECODE_INT(i) < 1){
-        //fatal_err("illegal reference of a vector.");
+    if(DECODE_INT(i) > len || DECODE_INT(i) < 0){
+        fatal_err("illegal reference of a vector.");
     }
 
         
