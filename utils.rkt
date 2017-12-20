@@ -47,7 +47,7 @@
                      length list-tail drop take member memv map append foldl foldr
                      vector? vector make-vector vector-ref vector-set! vector-length
                      set set->list list->set set-add set-union set-count set-first set-rest set-remove
-                     hash hash-ref hash-set hash-count hash-keys hash-has-key? hash?
+                     hash hash-ref hash-set hash-count hash-keys hash-has-key? hash? make-hash hash-set!
                      list? void? promise? procedure? number? integer?
                      error void print display write exit halt
                      eq? eqv? equal? not))
@@ -186,15 +186,16 @@
 
 
 
-(define (eval-top-level e)
-  (racket-compile-eval e))
+(define (eval-top-level e run)
+  (if run (racket-compile-eval e) (void)))
 
 
 
-(define (test-binary create-binary top-level-e)   
+(define (test-binary create-binary top-level-e filename dir)
+  (define value (if (equal? dir "secret") #f #t))   
   (define llvm-e (create-binary top-level-e))       
-  (define val2 (eval-llvm llvm-e))
-  (define val1 (eval-top-level top-level-e))  
+  (define val2 (eval-llvm llvm-e filename))
+  (define val1 (eval-top-level top-level-e value))  
   (if (equal? val1 val2)
       #t
       (begin
@@ -613,7 +614,7 @@
          [else (pretty-print `(bad-proc ,e)) #f]))
 
 (define recent-header #f)
-(define (eval-llvm llvm-str)
+(define (eval-llvm llvm-str filename)
   ; freshly compile the header / runtime library if not already
   (when (not recent-header)
         (set! recent-header #t)
@@ -623,8 +624,8 @@
   (define llvm (string-append header-str "\n\n;;;;;;\n\n" llvm-str))
   (display llvm (open-output-file "combined.ll" #:exists 'replace))
   ;(system (string-append clang++-path " combined.ll " libgc-path " -I " gc-include-path " -lpthread -o bin"))
-  (system (string-append clang++-path " combined.ll " " -o bin"))
-  (match-define `(,out-port ,in-port ,id ,err-port ,callback) (process "./bin"))
+  (system (string-append clang++-path " combined.ll " " -o " filename))
+  (match-define `(,out-port ,in-port ,id ,err-port ,callback) (process (string-append "./" filename)))
   (define starttime (current-milliseconds))
   (let loop ()
     ;(sleep 1)

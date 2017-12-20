@@ -10,7 +10,7 @@
 
 (define ((make-test path) exp ext)
         (lambda ()
-            (define t0 (test-binary create-binary exp))
+            (define t0 (test-binary create-binary exp (string-replace (last (string-split (path->string path) "/")) ".scm" "") (car (cdr (reverse (string-split (path->string path) "/"))))))
             t0))
 
 (define (tests-list dir)

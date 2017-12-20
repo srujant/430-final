@@ -128,7 +128,10 @@ void fatal_err(const char* msg)
 
 u64* alloc(const u64 m)
 {
-
+    memory_cap = memory_cap + m;
+    if(memory_cap > 268435456){
+        fatal_err("Memory cap exceeded 256 mb.");
+    }
     return (u64*)(malloc(m));
     //return new u64[m];
     //return (u64*)GC_MALLOC(m);
@@ -368,22 +371,16 @@ u64 prim_halt(u64 v) // halt
 
 u64 applyprim_vector(u64 lst)
 {
-    // pretty terrible, but works
-    u64* buffer = (u64*)malloc(512*sizeof(u64));
-    memory_cap = ENCODE_INT(DECODE_INT(memory_cap) + (512*sizeof(u64)));
-    //printf("%d\n", DECODE_INT(memory_cap));
-    if (DECODE_INT(memory_cap) > 268435456){
+    memory_cap = memory_cap + (512*sizeof(u64));
+    if(memory_cap > 268435456){
         fatal_err("Memory cap exceeded 256 mb.");
     }
+    // pretty terrible, but works
+    u64* buffer = (u64*)malloc(512*sizeof(u64));
     u64 l = 0;
     while ((lst&7) == CONS_TAG && l < 512) 
         buffer[l++] = expect_cons(lst, &lst);
     u64* mem = alloc((l + 1) * sizeof(u64));
-    memory_cap = ENCODE_INT(DECODE_INT(memory_cap) + ((l + 1) * sizeof(u64)));
-    //printf("%d\n", DECODE_INT(memory_cap));
-    if(DECODE_INT(memory_cap) > 268435456){
-        fatal_err("Memory cap exceeded 256 mb.");
-    }
     mem[0] = (l << 3) | VECTOR_OTHERTAG;
     for (u64 i = 0; i < l; ++i)
         mem[i+1] = buffer[i];
@@ -399,11 +396,6 @@ u64 prim_make_45vector(u64 lenv, u64 iv)
     
     const u64 l = DECODE_INT(lenv);
     u64* vec = (u64*)alloc((l + 1) * sizeof(u64));
-    memory_cap = ENCODE_INT(DECODE_INT(memory_cap) + ((l + 1) * sizeof(u64)));
-    //printf("%d\n", DECODE_INT(memory_cap));
-    if(DECODE_INT(memory_cap) > 268435456){
-        fatal_err("Memory cap exceeded 256 mb.");
-    }
     vec[0] = (l << 3) | VECTOR_OTHERTAG;
     for (u64 i = 1; i <= l; ++i)
         vec[i] = iv;
@@ -421,6 +413,12 @@ u64 prim_vector_45ref(u64 v, u64 i)
         fatal_err("vector-ref not given a properly formed vector");
 
     u64* vec = (u64*)DECODE_OTHER(v);
+    u64 len = vec[0] >> 3;
+
+    if(len < DECODE_INT(i) || DECODE_INT(i) < 1){
+        //fatal_err("illegal reference of a vector.");
+    }
+
 
     return ((u64*)DECODE_OTHER(v))[1+(DECODE_INT(i))];
 }
@@ -434,6 +432,12 @@ u64 prim_vector_45set_33(u64 a, u64 i, u64 v)
 
     if ((((u64*)DECODE_OTHER(a))[0]&7) != VECTOR_OTHERTAG)
         fatal_err("vector-ref not given a properly formed vector");
+
+    u64* vec = (u64*)DECODE_OTHER(a);
+    u64 len = vec[0] >> 3;
+    if(len <= DECODE_INT(i) || DECODE_INT(i) < 1){
+        //fatal_err("illegal reference of a vector.");
+    }
 
         
     ((u64*)(DECODE_OTHER(a)))[1+DECODE_INT(i)] = v;
@@ -558,11 +562,6 @@ GEN_EXPECT1ARGLIST(applyprim_cons_63, prim_cons_63)
 u64 prim_cons(u64 a, u64 b)
 {
     u64* p = alloc(2*sizeof(u64));
-    memory_cap = ENCODE_INT(DECODE_INT(memory_cap) + (2*sizeof(u64)));
-    //printf("%d\n", DECODE_INT(memory_cap));
-    if(DECODE_INT(memory_cap) > 268435456){
-        fatal_err("Memory cap exceeded 256 mb.");
-    }
     p[0] = a;
     p[1] = b;
     return ENCODE_CONS(p);
@@ -722,52 +721,86 @@ u64 prim_make_45hash(u64 lst)
     struct hash_tbl * new_pair = NULL;
     struct hash_tbl * new_table = NULL;
     u64 pair;
-    u64* vec = (u64*)alloc(2 * sizeof(hash_tbl));
+    memory_cap = memory_cap + (2 * sizeof(u64));
+    if(memory_cap > 268435456){
+        fatal_err("Memory cap exceeded 256 mb.");
+    }
+    u64* vec = (u64*)alloc(2 * sizeof(u64));
     vec[0] = HASH_OTHERTAG;
     while ((lst&7) == CONS_TAG){
+        struct hash_tbl * result = NULL;
+
         new_pair = (struct hash_tbl*)malloc(sizeof(struct hash_tbl));
-        u64 keylen = sizeof(u64);
-        pair = prim_car(lst);
-        u64 key = ENCODE_OTHER(prim_car(pair));
-        u64 value = ENCODE_OTHER(prim_cdr(pair));
+        pair = expect_cons(lst, &lst);
+        u64 key = expect_cons(pair, &pair);
         new_pair->key = key;
-        new_pair->value = value;
-        lst = prim_cdr(lst);
-        HASH_ADD(hh, new_table, key, DECODE_INT(keylen), new_pair);
+        new_pair->value = pair;
+        HASH_FIND(hh, new_table, &key, sizeof(u64), result);
+        if(result != NULL){
+            result->value = pair;
+        }else{
+            HASH_ADD(hh, new_table, key, sizeof(u64), new_pair);
+        }
     }
     vec[1] = ENCODE_OTHER(new_table);
     return ENCODE_OTHER(vec);
 }
 
 GEN_EXPECT1ARGLIST(applyprim_make_45hash, prim_make_45hash)
-/**
+
 u64 prim_hash_45ref(u64 hash, u64 key)
 {
-    if((HASH_OTHERTAG != (((u64*)DECODE_OTHER(hash))[0]))){
+    if ((hash&7) != OTHER_TAG || (HASH_OTHERTAG != (((u64*)DECODE_OTHER(hash))[0]))){
         fatal_err("Not given a hash.");
     }
     
     u64* vec = (u64*)DECODE_OTHER(hash);
-    u64 keylen = sizeof(u64);
     u64* ptr_to_hash = DECODE_OTHER(vec[1]);
-    hash_tbl * tbls = (hash_tbl *) ptr_to_hash;
-    hash_tbl * tbl = NULL;
-    struct hash_tbl pair_to_find;
-    memset(&pair_to_find,0,sizeof(struct hash_tbl));
-    pair_to_find.key = key;
-    HASH_FIND(hh, tbls, &key, DECODE_INT(keylen), tbl);
+    struct hash_tbl * tbls = (struct hash_tbl *) ptr_to_hash;
+    struct hash_tbl * tbl = NULL;
+
+    HASH_FIND(hh, tbls, &key, sizeof(u64), tbl);
     if(tbl != NULL){
-        printf("(%d . %d) ", DECODE_INT(tbl->key), DECODE_INT(tbl->value));
         return tbl->value;
     }
     
-    return V_NULL;
+    fatal_err("Given a key that is not found within the hash.");
+    return V_VOID;
     
 
 }
 
 GEN_EXPECT2ARGLIST(applyprim_hash_45ref, prim_hash_45ref)
-**/
+
+u64 prim_hash_45set_33(u64 hash, u64 key, u64 value)
+{
+    if ((hash&7) != OTHER_TAG || (HASH_OTHERTAG != (((u64*)DECODE_OTHER(hash))[0]))){
+        fatal_err("Not given a hash.");
+    }
+    
+    u64* vec = (u64*)DECODE_OTHER(hash);
+    u64* ptr_to_hash = DECODE_OTHER(vec[1]);
+    struct hash_tbl * tbls = (struct hash_tbl *) ptr_to_hash;
+    struct hash_tbl * tbl = NULL;
+
+    HASH_FIND(hh, tbls, &key, sizeof(u64), tbl);
+    if(tbl != NULL){
+        tbl->value = value;
+    }else{
+        struct hash_tbl * new_pair = NULL;
+
+        new_pair = (struct hash_tbl*)malloc(sizeof(struct hash_tbl));
+        new_pair->key = key;
+        new_pair->value = value;
+        HASH_ADD(hh, tbls, key, sizeof(u64), new_pair);
+    }
+    
+    return V_VOID;
+    
+
+}
+
+GEN_EXPECT3ARGLIST(applyprim_hash_45set_33, prim_hash_45set_33)
 
 }
 
