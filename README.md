@@ -106,7 +106,7 @@ This project is the culmination of a semester's worth of work that takes a schem
 
 #### **Prim operations added by me**
 
-**NOTE** - The tests I made for hashes are inside the `public` tests.
+**NOTE** - The tests I made for hashes are inside the `public` folder.
 
 - `make-hash`
    - satisfies: `(and/c hash? hash-equal?)`
@@ -158,3 +158,6 @@ $ racket tests.rkt hash-ref-keynotexist
 
 ### Changes made to `utils.rkt` and `tests.rkt`
 I created my own method, `test-binary` that calls the method I mentioned above `create-binary`. `test-binary` is passed the expression that is being decoded, the path (which is broken down to just the filename such that the binary is created of the filename), and the folder (if the folder is `secret` then `eval-llvm` is not run such that an exception is not produced when running the tests). This is then passed to `eval-llvm` and `test-binary` which create the compiled executeable and check to see if the output is correct. For tests that do not run `eval-llvm`, `void` is returned such that the tests pass (since exceptions are thrown).
+
+### BOEHM GC Attempt
+I was able to get the github repository to compile on my computer, but unfortunately did not have enough time to implement BOEHM GC. Currently, the pertinent files that would be necessary to implement BOEHM GC is inside the `bdwgc` folder.
